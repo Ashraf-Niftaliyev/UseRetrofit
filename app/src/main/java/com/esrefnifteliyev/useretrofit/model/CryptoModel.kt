@@ -3,8 +3,8 @@ package com.esrefnifteliyev.useretrofit.model
 import com.google.gson.annotations.SerializedName
 
 data class CryptoModel(
-    @SerializedName("name")
+    @SerializedName("currency")
     val name: String,
-    @SerializedName("capital")
+    @SerializedName("price")
     val capital: String
 )

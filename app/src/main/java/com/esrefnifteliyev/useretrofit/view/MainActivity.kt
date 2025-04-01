@@ -22,7 +22,7 @@ import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity(), CryptoAdapter.Listener {
-    private val BASE_URL = "https://countryapi.io/api/"
+    private val BASE_URL = "https://raw.githubusercontent.com/"
     private var cryptoList : ArrayList<CryptoModel>? = null
     private var cryptoAdapter: CryptoAdapter? = null
     private lateinit var binding: ActivityMainBinding
@@ -30,13 +30,16 @@ class MainActivity : AppCompatActivity(), CryptoAdapter.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-
-        val layoutManager : LayoutManager = LinearLayoutManager(this)
-        binding.recyclerView.layoutManager = layoutManager
-
-        loadData()
+        setContentView(binding.root)
 
         compositeDisposable = CompositeDisposable()
+        loadData()
+
+        /** QEYD:
+         * Eger ki run ederken datalar gelmese, 100 faiz
+         * https://raw.githubusercontent.com/atilsamancioglu/K21-JSONDataSet/refs/heads/master/crypto.json
+         * bu linki google da acmagi unutmusan. Bu link aciq olmasa datalar gelmeyecek.
+         */
 
 
     }
@@ -49,13 +52,18 @@ class MainActivity : AppCompatActivity(), CryptoAdapter.Listener {
             .build().create(CryptoApi::class.java)
 
 
-        compositeDisposable?.add(retrofit.getData()
-                 .subscribeOn(Schedulers.io())
-                 .observeOn(AndroidSchedulers.mainThread())
-                 .subscribe(this::handleResponse))
-
-
-
+        compositeDisposable?.add(
+            retrofit.getData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    // onSuccess
+                    handleResponse(it)
+                }, {
+                    // onError
+                    it.printStackTrace()
+                })
+        )
     }
 
     private fun handleResponse(cryptoModel: List<CryptoModel>){
